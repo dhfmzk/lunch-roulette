@@ -25,7 +25,7 @@ function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<GameMode>('STANDARD');
   const { activeTouches, clearStamped } = useMultiTouch(containerRef, mode);
-  const { gameState, highlightedId, loserId, timeLeft, lockedTouches } = useGameLoop(activeTouches, mode);
+  const { gameState, highlightedId, loserId, timeLeft, lockedTouches, resetGame } = useGameLoop(activeTouches, mode);
   const [simCount, setSimCount] = useState<number>(2);
 
   useEffect(() => {
@@ -107,7 +107,7 @@ function App() {
         {gameState === 'FINISHED' && loserTouch && (
           <motion.div 
             initial={{ scale: 0.5, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: -200 }}
+            animate={{ scale: 1, opacity: 1, y: -20 }}
             className="absolute z-50 flex flex-col items-center justify-center pointer-events-none"
           >
             <div className="text-5xl font-black text-white mix-blend-overlay drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] tracking-tighter text-center">
@@ -121,6 +121,13 @@ function App() {
                 당첨자는 식권대장 앱을 열고 메뉴를 큐레이션해주세요.
               </p>
             </div>
+            
+            <button
+              onClick={() => { clearStamped(); resetGame(); }}
+              className="mt-8 px-8 py-4 bg-white/95 text-slate-900 rounded-full font-bold text-xl sm:text-2xl shadow-xl hover:scale-105 active:scale-95 hover:bg-white transition-all pointer-events-auto"
+            >
+              다시 하기
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

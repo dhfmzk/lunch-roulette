@@ -134,5 +134,14 @@ export function useGameLoop(activeTouches: TouchInfo[], mode: 'STANDARD' | 'LARG
     }
   }, [gameState, lockedIds]);
 
-  return { gameState, highlightedId, loserId, timeLeft, lockedTouches };
+  const resetGame = () => {
+    setGameState('WAITING');
+    setLockedIds([]);
+    setLockedTouches([]);
+    setHighlightedId(null);
+    setLoserId(null);
+    setTimeLeft(null);
+  };
+
+  return { gameState, highlightedId, loserId, timeLeft, lockedTouches, resetGame };
 }
