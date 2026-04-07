@@ -126,15 +126,21 @@ function App() {
             animate={{ scale: 1, opacity: 1, y: -20 }}
             className="absolute z-50 flex flex-col items-center justify-center pointer-events-none"
           >
-            <div className="text-5xl font-black text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] tracking-tighter text-center">
+            <div 
+              className="text-5xl sm:text-6xl font-black text-white tracking-tighter text-center"
+              style={{ textShadow: '0 6px 20px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6)' }}
+            >
               <div>
-                <span className="drop-shadow-[0_0_20px_rgba(0,0,0,1)]" style={{ color: loserTouch.color, textShadow: '0 0 20px #000' }}>
+                <span style={{ color: loserTouch.color }}>
                   {COLOR_NAMES[loserTouch.color] || ''}
                 </span>
-                <span className="drop-shadow-lg"> 당첨!</span>
+                <span> 당첨!</span>
               </div>
-              <p className="text-sm font-medium mt-6 tracking-normal drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] text-white opacity-95 break-keep">
-                당첨자는 식권대장 앱을 열고 메뉴를 큐레이션해주세요.
+              <p 
+                className="text-base sm:text-lg font-medium mt-6 tracking-normal text-white/95 break-keep"
+                style={{ textShadow: '0 4px 12px rgba(0,0,0,0.9)' }}
+              >
+                식권대장 앱을 열고 메뉴를 큐레이션해주세요.
               </p>
             </div>
             
