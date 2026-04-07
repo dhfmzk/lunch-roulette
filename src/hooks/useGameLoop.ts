@@ -26,6 +26,10 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
         setHighlightedId(null);
         setLoserId(null);
         setTimeLeft(null);
+      } else if (activeIds.length > lockedIds.length) {
+        // If fingers were added without lifting existing ones, sync the new fingers!
+        setLockedIds(activeIds);
+        setLockedTouches([...activeTouches]);
       }
     } else if (gameState === 'WAITING') {
       if (activeTouches.length >= 2) {

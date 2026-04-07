@@ -39,8 +39,8 @@ function App() {
     }
   }, [gameState]);
 
-  // During WAITING use activeTouches, otherwise use lockedTouches so circles stay on screen
-  const displayTouches = gameState === 'WAITING' ? activeTouches : lockedTouches;
+  // During WAITING and READY_TIMER use activeTouches, otherwise use lockedTouches so circles stay on screen
+  const displayTouches = (gameState === 'WAITING' || gameState === 'READY_TIMER') ? activeTouches : lockedTouches;
   const loserTouch = displayTouches.find(t => t.id === loserId);
 
   return (
