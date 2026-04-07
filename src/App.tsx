@@ -50,8 +50,8 @@ function App() {
     >
       {gameState === 'WAITING' && activeTouches.length === 0 && (
         <div className="pointer-events-none text-center transform transition-opacity duration-500 opacity-100">
-          <h1 className="text-4xl text-white font-extrabold tracking-widest text-shadow-md">
-            TAP ROULETTE
+          <h1 className="text-4xl text-white font-extrabold tracking-widest text-shadow-md uppercase">
+            lunch-roulette
           </h1>
           <p className="text-slate-400 mt-4 text-sm font-medium px-8 opacity-80">
             손가락을 2개 이상 올리고 기다리면 게임이 시작됩니다.
@@ -68,10 +68,15 @@ function App() {
             className="absolute z-50 flex flex-col items-center justify-center pointer-events-none"
           >
             <div className="text-5xl font-black text-white mix-blend-overlay drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] tracking-tighter text-center">
-              <span style={{ color: loserTouch.color, textShadow: '0 0 20px #000' }}>
-                {COLOR_NAMES[loserTouch.color] || ''}
-              </span>
-              <span> 당첨!</span>
+              <div>
+                <span style={{ color: loserTouch.color, textShadow: '0 0 20px #000' }}>
+                  {COLOR_NAMES[loserTouch.color] || ''}
+                </span>
+                <span> 당첨!</span>
+              </div>
+              <p className="text-sm font-medium mt-6 tracking-normal drop-shadow-md text-white opacity-90 break-keep">
+                당첨자는 식권대장 앱을 열고 메뉴를 큐레이션해주세요.
+              </p>
             </div>
           </motion.div>
         )}
