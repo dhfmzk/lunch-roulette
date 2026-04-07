@@ -3,7 +3,7 @@ import type { TouchInfo } from './useMultiTouch';
 
 export type GameState = 'WAITING' | 'READY_TIMER' | 'ROULETTE' | 'FINISHED';
 
-export function useGameLoop(activeTouches: TouchInfo[]) {
+export function useGameLoop(activeTouches: TouchInfo[], mode: 'STANDARD' | 'LARGE_GROUP') {
   const [gameState, setGameState] = useState<GameState>('WAITING');
   const [lockedIds, setLockedIds] = useState<number[]>([]);
   const [lockedTouches, setLockedTouches] = useState<TouchInfo[]>([]);
@@ -16,35 +16,62 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
 
   // 1. Abort logic or Start
   useEffect(() => {
-    if (gameState === 'READY_TIMER') {
-      const isMissing = lockedIds.some(id => !activeIds.includes(id)) || activeTouches.length < 2;
-      
-      if (isMissing || activeTouches.length === 0) {
-        setGameState('WAITING');
-        setLockedIds([]);
-        setLockedTouches([]);
-        setHighlightedId(null);
-        setLoserId(null);
-        setTimeLeft(null);
-      } else if (activeIds.length > lockedIds.length) {
-        // If fingers were added without lifting existing ones, sync the new fingers!
-        setLockedIds(activeIds);
-        setLockedTouches([...activeTouches]);
+    const physicalCount = activeTouches.filter(t => t.isPhysical).length;
+    const stampedCount = activeTouches.filter(t => t.isStamped).length;
+
+    if (mode === 'STANDARD') {
+      if (gameState === 'READY_TIMER') {
+        const isMissing = lockedIds.some(id => !activeIds.includes(id)) || activeTouches.length < 2;
+        
+        if (isMissing || activeTouches.length === 0) {
+          setGameState('WAITING');
+          setLockedIds([]);
+          setLockedTouches([]);
+          setHighlightedId(null);
+          setLoserId(null);
+          setTimeLeft(null);
+        } else if (activeIds.length > lockedIds.length) {
+          setLockedIds(activeIds);
+          setLockedTouches([...activeTouches]);
+        }
+      } else if (gameState === 'WAITING') {
+        if (activeTouches.length >= 2) {
+          setLockedIds(activeIds);
+          setLockedTouches([...activeTouches]);
+          setGameState('READY_TIMER');
+        }
       }
-    } else if (gameState === 'WAITING') {
-      if (activeTouches.length >= 2) {
-        setLockedIds(activeIds);
-        setLockedTouches([...activeTouches]);
-        setGameState('READY_TIMER');
+    } else {
+      // LARGE_GROUP Mode
+      if (gameState === 'READY_TIMER') {
+        if (physicalCount > 0) {
+           // Any physical touch breaks the timer back to WAITING so they can stamp
+           setGameState('WAITING');
+           setLockedIds([]);
+           setLockedTouches([]);
+           setHighlightedId(null);
+           setLoserId(null);
+           setTimeLeft(null);
+        } else {
+           setLockedIds(activeTouches.filter(t => t.isStamped).map(t => t.id));
+           setLockedTouches([...activeTouches]);
+        }
+      } else if (gameState === 'WAITING') {
+        if (stampedCount >= 2 && physicalCount === 0) {
+           // Everyone let go, minimum 2 stamped fingers
+           setLockedIds(activeTouches.filter(t => t.isStamped).map(t => t.id));
+           setLockedTouches([...activeTouches]);
+           setGameState('READY_TIMER');
+        }
       }
     }
-    // Once in ROULETTE or FINISHED, releasing fingers no longer aborts the sequence.
-  }, [activeIdsStr, gameState]);
+  }, [activeIdsStr, gameState, mode]);
 
   // 2. Ready Timer with Countdown
   useEffect(() => {
     if (gameState === 'READY_TIMER') {
-      setTimeLeft(3);
+      const waitTime = mode === 'LARGE_GROUP' ? 5 : 3;
+      setTimeLeft(waitTime);
       const countdownInterval = setInterval(() => {
         setTimeLeft(prev => (prev !== null && prev > 1 ? prev - 1 : prev));
       }, 750);
@@ -52,7 +79,7 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
       const timer = setTimeout(() => {
         setGameState('ROULETTE');
         setTimeLeft(null);
-      }, 2500);
+      }, waitTime * 750 + 250);
       
       return () => {
         clearInterval(countdownInterval);

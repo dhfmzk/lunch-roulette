@@ -19,10 +19,13 @@ const COLOR_NAMES: Record<string, string> = {
   '#6366f1': '남색',
 };
 
+type GameMode = 'STANDARD' | 'LARGE_GROUP';
+
 function App() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const activeTouches = useMultiTouch(containerRef);
-  const { gameState, highlightedId, loserId, timeLeft, lockedTouches } = useGameLoop(activeTouches);
+  const [mode, setMode] = useState<GameMode>('STANDARD');
+  const { activeTouches, clearStamped } = useMultiTouch(containerRef, mode);
+  const { gameState, highlightedId, loserId, timeLeft, lockedTouches } = useGameLoop(activeTouches, mode);
   const [simCount, setSimCount] = useState<number>(2);
 
   useEffect(() => {
@@ -63,6 +66,43 @@ function App() {
       )}
 
       {/* Winning Text */}
+      {/* Top Header & Buttons */}
+      <div className="absolute top-4 left-4 flex gap-4 z-50">
+        {gameState === 'WAITING' && (
+          <div className="flex bg-slate-800/80 p-1 rounded-full border border-slate-700/50 backdrop-blur pointer-events-auto">
+            <button 
+              onClick={() => { setMode('STANDARD'); clearStamped(); }}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${mode === 'STANDARD' ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+            >
+              기본(1~5인)
+            </button>
+            <button 
+              onClick={() => { setMode('LARGE_GROUP'); clearStamped(); }}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${mode === 'LARGE_GROUP' ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+            >
+              다인원(터치고정)
+            </button>
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {gameState === 'WAITING' && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-16 text-slate-400 font-medium text-lg pointer-events-none"
+          >
+            {mode === 'STANDARD' ? 
+              (displayTouches.length === 0 ? "손가락을 최소 2개 이상 올려주세요!" : "그대로 유지하세요...") 
+             : 
+              ("한 명씩 1초간 눌러 고정한 뒤 차례로 떼어주세요!")
+            }
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {gameState === 'FINISHED' && loserTouch && (
           <motion.div 
@@ -110,6 +150,7 @@ function App() {
           gameState={gameState}
           isHighlighted={highlightedId === touch.id}
           isLoser={loserId === touch.id}
+          isStamped={touch.isStamped}
         />
       ))}
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 
 export interface TouchInfo {
@@ -6,6 +6,8 @@ export interface TouchInfo {
   x: number;
   y: number;
   color: string;
+  isStamped?: boolean;
+  isPhysical?: boolean;
 }
 
 const COLORS = [
@@ -21,15 +23,31 @@ const COLORS = [
   '#6366f1', // indigo-500
 ];
 
-export function useMultiTouch(containerRef: RefObject<HTMLElement | null>) {
-  const [touches, setTouches] = useState<Map<number, TouchInfo>>(new Map());
+export function useMultiTouch(containerRef: RefObject<HTMLElement | null>, mode: 'STANDARD' | 'LARGE_GROUP') {
+  const [physicalTouches, setPhysicalTouches] = useState<Map<number, TouchInfo>>(new Map());
+  const [stampedTouches, setStampedTouches] = useState<Map<number, TouchInfo>>(new Map());
+  const stampTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+  const stampedRef = useRef(stampedTouches);
+  stampedRef.current = stampedTouches;
+
+  // Clear when mode changes
+  useEffect(() => {
+    setPhysicalTouches(new Map());
+    setStampedTouches(new Map());
+    stampTimers.current.forEach(t => clearTimeout(t));
+    stampTimers.current.clear();
+  }, [mode]);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const getAvailableColor = (currentTouches: Map<number, TouchInfo>) => {
-      const usedColors = Array.from(currentTouches.values()).map(t => t.color);
+    const getAvailableColor = (currentPhysical: Map<number, TouchInfo>) => {
+      const usedPhysical = Array.from(currentPhysical.values()).map(t => t.color);
+      const usedStamped = Array.from(stampedRef.current.values()).map(t => t.color);
+      const usedColors = [...usedPhysical, ...usedStamped];
+      
       const availableColors = COLORS.filter(c => !usedColors.includes(c));
       return availableColors.length > 0 
         ? availableColors[Math.floor(Math.random() * availableColors.length)]
@@ -38,17 +56,30 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>) {
 
     const handleTouchStart = (e: TouchEvent) => {
       e.preventDefault();
-      setTouches(prev => {
+      setPhysicalTouches(prev => {
         const next = new Map(prev);
         for (let i = 0; i < e.changedTouches.length; i++) {
           const touch = e.changedTouches[i];
           if (!next.has(touch.identifier)) {
-            next.set(touch.identifier, {
+            const tInfo = {
               id: touch.identifier,
               x: touch.clientX,
               y: touch.clientY,
               color: getAvailableColor(next),
-            });
+              isPhysical: true,
+            };
+            next.set(touch.identifier, tInfo);
+
+            if (mode === 'LARGE_GROUP') {
+              const timer = setTimeout(() => {
+                setStampedTouches(s => {
+                  const ns = new Map(s);
+                  ns.set(touch.identifier, { ...tInfo, isStamped: true, isPhysical: false });
+                  return ns;
+                });
+              }, 800);
+              stampTimers.current.set(touch.identifier, timer);
+            }
           }
         }
         return next;
@@ -57,7 +88,7 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>) {
 
     const handleTouchMove = (e: TouchEvent) => {
       e.preventDefault();
-      setTouches(prev => {
+      setPhysicalTouches(prev => {
         const next = new Map(prev);
         for (let i = 0; i < e.changedTouches.length; i++) {
           const touch = e.changedTouches[i];
@@ -72,10 +103,15 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>) {
 
     const handleTouchEnd = (e: TouchEvent) => {
       e.preventDefault();
-      setTouches(prev => {
+      setPhysicalTouches(prev => {
         const next = new Map(prev);
         for (let i = 0; i < e.changedTouches.length; i++) {
-          next.delete(e.changedTouches[i].identifier);
+          const id = e.changedTouches[i].identifier;
+          next.delete(id);
+          if (stampTimers.current.has(id)) {
+            clearTimeout(stampTimers.current.get(id)!);
+            stampTimers.current.delete(id);
+          }
         }
         return next;
       });
@@ -92,7 +128,17 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>) {
       container.removeEventListener('touchend', handleTouchEnd);
       container.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [containerRef]);
+  }, [containerRef, mode]);
 
-  return Array.from(touches.values());
+  const combined = new Map<number, TouchInfo>();
+  stampedTouches.forEach((v, k) => combined.set(k, v));
+  physicalTouches.forEach((v, k) => {
+    if (combined.has(k)) {
+      combined.set(k, { ...v, isStamped: true });
+    } else {
+      combined.set(k, v);
+    }
+  });
+
+  return { activeTouches: Array.from(combined.values()), clearStamped: () => setStampedTouches(new Map()) };
 }

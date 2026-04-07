@@ -8,10 +8,11 @@ interface TouchPointProps {
   color: string;
   isHighlighted: boolean;
   isLoser: boolean;
+  isStamped?: boolean;
   gameState: 'WAITING' | 'READY_TIMER' | 'ROULETTE' | 'FINISHED';
 }
 
-export function TouchPoint({ x, y, color, isHighlighted, isLoser, gameState }: TouchPointProps) {
+export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, gameState }: TouchPointProps) {
   const size = 96; // 6rem
 
   // Frame-perfect sync: Audio triggers precisely when the visual highlight is rendered!
@@ -56,6 +57,8 @@ export function TouchPoint({ x, y, color, isHighlighted, isLoser, gameState }: T
         y: y - size / 2,
         boxShadow: glow
       }}
+      exit={{ scale: 0, opacity: 0 }}
+      className={`absolute rounded-full border-4 ${isStamped ? 'border-white/80 shadow-[0_0_20px_rgba(255,255,255,0.4)]' : 'border-transparent'} flex items-center justify-center`}
       transition={{ 
         scale: { type: 'spring', bounce: 0.4 },
         opacity: { duration: isInstant ? 0 : 0.2 },
