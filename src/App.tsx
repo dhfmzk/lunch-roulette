@@ -108,14 +108,15 @@ function App() {
       {/* Debug Local Sim Button */}
       {import.meta.env.DEV && (
         <div className="absolute top-4 right-4 flex gap-2 z-50 pointer-events-auto items-center">
-          <input 
-            type="number" 
-            min="2" 
-            max="10" 
+          <select 
             value={simCount} 
             onChange={e => setSimCount(parseInt(e.target.value) || 2)}
-            className="w-12 bg-white/20 text-white px-1 py-2 rounded text-center outline-none text-sm appearance-none"
-          />
+            className="bg-white/20 text-white px-2 py-2 rounded text-center outline-none text-sm cursor-pointer"
+          >
+            {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+              <option key={n} value={n} className="bg-slate-800 text-white">{n}명</option>
+            ))}
+          </select>
           <button 
             onClick={() => {
               if (!containerRef.current) return;
@@ -125,11 +126,10 @@ function App() {
               const count = Math.min(Math.max(simCount, 2), 10);
               
               for (let i = 0; i < count; i++) {
-                // Determine a nice ring layout for the random touches
-                const angle = (i / count) * Math.PI * 2;
-                const radius = Math.min(w, h) * 0.3;
-                const tx = w / 2 + Math.cos(angle) * radius;
-                const ty = h / 2 + Math.sin(angle) * radius;
+                // Generate random positions with some margin to keep them on screen
+                const margin = 50;
+                const tx = margin + Math.random() * (w - 2 * margin);
+                const ty = margin + Math.random() * (h - 2 * margin);
                 newTouches.push(new Touch({ identifier: i + 1, target: containerRef.current, clientX: tx, clientY: ty }));
               }
               const event = new TouchEvent('touchstart', { touches: newTouches as unknown as Touch[], changedTouches: newTouches as unknown as Touch[] });
