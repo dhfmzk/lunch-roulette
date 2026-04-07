@@ -67,7 +67,7 @@ function App() {
 
       {/* Winning Text */}
       {/* Top Header & Buttons */}
-      <div className="absolute top-4 left-4 flex gap-4 z-50">
+      <div className="absolute safe-top-left flex gap-4 z-50">
         {gameState === 'WAITING' && (
           <div className="flex bg-slate-800/80 p-1 rounded-full border border-slate-700/50 backdrop-blur pointer-events-auto">
             <button 
@@ -97,7 +97,7 @@ function App() {
             {mode === 'STANDARD' ? 
               (displayTouches.length === 0 ? "손가락을 최소 2개 이상 올려주세요!" : "그대로 유지하세요...") 
              : 
-              ("한 명씩 1초간 눌러 고정한 뒤 차례로 떼어주세요!")
+              ("한 명씩 3초간 눌러 고정한 뒤 차례로 떼어주세요!")
             }
           </motion.div>
         )}
@@ -151,6 +151,7 @@ function App() {
           isHighlighted={highlightedId === touch.id}
           isLoser={loserId === touch.id}
           isStamped={touch.isStamped}
+          isLargeGroup={mode === 'LARGE_GROUP'}
         />
       ))}
 

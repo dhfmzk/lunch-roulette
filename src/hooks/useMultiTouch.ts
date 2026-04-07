@@ -78,7 +78,7 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>, mode:
                   ns.set(touch.identifier, { ...tInfo, isStamped: true, isPhysical: false });
                   return ns;
                 });
-              }, 800);
+              }, 3000);
               stampTimers.current.set(touch.identifier, timer);
             }
           }

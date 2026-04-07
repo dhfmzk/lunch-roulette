@@ -9,10 +9,11 @@ interface TouchPointProps {
   isHighlighted: boolean;
   isLoser: boolean;
   isStamped?: boolean;
+  isLargeGroup?: boolean;
   gameState: 'WAITING' | 'READY_TIMER' | 'ROULETTE' | 'FINISHED';
 }
 
-export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, gameState }: TouchPointProps) {
+export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, isLargeGroup, gameState }: TouchPointProps) {
   const size = 96; // 6rem
 
   // Frame-perfect sync: Audio triggers precisely when the visual highlight is rendered!
@@ -51,7 +52,7 @@ export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, gam
     <motion.div
       initial={{ scale: 0, opacity: 0 }}
       animate={{ 
-        scale: 1, 
+        scale: isStamped ? [1, 1.15, 1] : 1, 
         opacity, 
         x: x - size / 2, 
         y: y - size / 2,
@@ -62,8 +63,8 @@ export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, gam
       transition={{ 
         scale: { type: 'spring', bounce: 0.4 },
         opacity: { duration: isInstant ? 0 : 0.2 },
-        x: { type: 'spring', bounce: 0, duration: 0.1 },
-        y: { type: 'spring', bounce: 0, duration: 0.1 },
+        left: { type: 'spring', bounce: 0, duration: 0.2 },
+        top: { type: 'spring', bounce: 0, duration: 0.2 },
         boxShadow: { duration: isInstant ? 0 : 0.2 }
       }}
       style={{
@@ -78,6 +79,23 @@ export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, gam
         pointerEvents: 'none'
       }}
     >
+      {!isStamped && isLargeGroup && gameState === 'WAITING' && (
+        <svg className="absolute overflow-visible pointer-events-none" style={{ width: 130, height: 130 }} viewBox="0 0 100 100">
+          <motion.circle
+            cx="50"
+            cy="50"
+            r="44"
+            fill="none"
+            stroke="white"
+            strokeWidth="4"
+            className="opacity-70 drop-shadow-md"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 3, ease: "linear" }}
+            style={{ rotate: -90, transformOrigin: 'center' }}
+          />
+        </svg>
+      )}
       {(gameState === 'WAITING' || gameState === 'READY_TIMER') && (
         <motion.div
           animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
