@@ -55,6 +55,7 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>, mode:
     };
 
     const handleTouchStart = (e: TouchEvent) => {
+      if ((e.target as HTMLElement).closest('button')) return;
       e.preventDefault();
       setPhysicalTouches(prev => {
         const next = new Map(prev);
@@ -87,6 +88,7 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>, mode:
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if ((e.target as HTMLElement).closest('button')) return;
       e.preventDefault();
       setPhysicalTouches(prev => {
         const next = new Map(prev);
@@ -102,6 +104,7 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>, mode:
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if ((e.target as HTMLElement).closest('button')) return;
       e.preventDefault();
       setPhysicalTouches(prev => {
         const next = new Map(prev);
