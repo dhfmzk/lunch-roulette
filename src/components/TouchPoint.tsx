@@ -10,10 +10,11 @@ interface TouchPointProps {
   isLoser: boolean;
   isStamped?: boolean;
   isLargeGroup?: boolean;
+  index: number;
   gameState: 'WAITING' | 'READY_TIMER' | 'ROULETTE' | 'FINISHED';
 }
 
-export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, isLargeGroup, gameState }: TouchPointProps) {
+export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, isLargeGroup, index, gameState }: TouchPointProps) {
   const size = 96; // 6rem
 
   // Frame-perfect sync: Audio triggers precisely when the visual highlight is rendered!
@@ -79,6 +80,9 @@ export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, isL
         pointerEvents: 'none'
       }}
     >
+      <span className="text-white text-4xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] z-20">
+        {index}
+      </span>
       {!isStamped && isLargeGroup && gameState === 'WAITING' && (
         <svg className="absolute overflow-visible pointer-events-none" style={{ width: 130, height: 130 }} viewBox="0 0 100 100">
           <motion.circle

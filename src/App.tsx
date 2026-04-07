@@ -164,9 +164,10 @@ function App() {
       </AnimatePresence>
 
       {/* Touch points */}
-      {displayTouches.map(touch => (
+      {displayTouches.map((touch, idx) => (
         <TouchPoint 
           key={touch.id}
+          index={idx + 1}
           x={touch.x}
           y={touch.y}
           color={touch.color}
