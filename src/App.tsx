@@ -112,7 +112,7 @@ function App() {
 
       {/* Debug Local Sim Button */}
       {import.meta.env.DEV && (
-        <div className="absolute top-4 right-4 flex gap-2 z-50 pointer-events-auto items-center">
+        <div className="absolute top-4 right-4 hidden md:flex gap-2 z-50 pointer-events-auto items-center">
           <select 
             value={simCount} 
             onChange={e => setSimCount(parseInt(e.target.value) || 2)}
