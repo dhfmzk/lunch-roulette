@@ -22,7 +22,7 @@ const COLOR_NAMES: Record<string, string> = {
 function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const activeTouches = useMultiTouch(containerRef);
-  const { gameState, highlightedId, loserId, timeLeft } = useGameLoop(activeTouches);
+  const { gameState, highlightedId, loserId, timeLeft, lockedTouches } = useGameLoop(activeTouches);
   const [simCount, setSimCount] = useState<number>(2);
 
   useEffect(() => {
@@ -39,7 +39,9 @@ function App() {
     }
   }, [gameState]);
 
-  const loserTouch = activeTouches.find(t => t.id === loserId);
+  // During WAITING use activeTouches, otherwise use lockedTouches so circles stay on screen
+  const displayTouches = gameState === 'WAITING' ? activeTouches : lockedTouches;
+  const loserTouch = displayTouches.find(t => t.id === loserId);
 
   return (
     <div 
@@ -98,7 +100,7 @@ function App() {
       </AnimatePresence>
 
       {/* Touch points */}
-      {activeTouches.map(touch => (
+      {displayTouches.map(touch => (
         <TouchPoint 
           key={touch.id}
           x={touch.x}

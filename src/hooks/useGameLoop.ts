@@ -6,6 +6,7 @@ export type GameState = 'WAITING' | 'READY_TIMER' | 'ROULETTE' | 'FINISHED';
 export function useGameLoop(activeTouches: TouchInfo[]) {
   const [gameState, setGameState] = useState<GameState>('WAITING');
   const [lockedIds, setLockedIds] = useState<number[]>([]);
+  const [lockedTouches, setLockedTouches] = useState<TouchInfo[]>([]);
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
   const [loserId, setLoserId] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -15,12 +16,13 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
 
   // 1. Abort logic or Start
   useEffect(() => {
-    if (gameState === 'READY_TIMER' || gameState === 'ROULETTE' || gameState === 'FINISHED') {
-      const isMissing = lockedIds.some(id => !activeIds.includes(id)) || (gameState === 'READY_TIMER' && activeTouches.length < 2);
+    if (gameState === 'READY_TIMER') {
+      const isMissing = lockedIds.some(id => !activeIds.includes(id)) || activeTouches.length < 2;
       
       if (isMissing || activeTouches.length === 0) {
         setGameState('WAITING');
         setLockedIds([]);
+        setLockedTouches([]);
         setHighlightedId(null);
         setLoserId(null);
         setTimeLeft(null);
@@ -28,9 +30,11 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
     } else if (gameState === 'WAITING') {
       if (activeTouches.length >= 2) {
         setLockedIds(activeIds);
+        setLockedTouches([...activeTouches]);
         setGameState('READY_TIMER');
       }
     }
+    // Once in ROULETTE or FINISHED, releasing fingers no longer aborts the sequence.
   }, [activeIdsStr, gameState]);
 
   // 2. Ready Timer with Countdown
@@ -62,6 +66,10 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
       const maxTicks = 20;
       const baseDelay = 50;
       let localTimer: ReturnType<typeof setTimeout>;
+      let previousId: number | null = null;
+
+      // Ensure every ID is visited at least once initially
+      const initialSequence = [...lockedIds].sort(() => Math.random() - 0.5);
 
       const runTick = () => {
         if (ticks >= maxTicks) {
@@ -72,7 +80,18 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
            return;
         }
         
-        const randomId = lockedIds[Math.floor(Math.random() * lockedIds.length)];
+        let randomId;
+        if (ticks < initialSequence.length) {
+          // Play sequence ensuring all are seen at least once
+          randomId = initialSequence[ticks];
+        } else {
+          // Completely random, but prefer avoiding same color twice in a row visually
+          do {
+            randomId = lockedIds[Math.floor(Math.random() * lockedIds.length)];
+          } while (lockedIds.length > 1 && randomId === previousId);
+        }
+        
+        previousId = randomId;
         setHighlightedId(randomId);
         
         ticks++;
@@ -84,5 +103,5 @@ export function useGameLoop(activeTouches: TouchInfo[]) {
     }
   }, [gameState, lockedIds]);
 
-  return { gameState, highlightedId, loserId, timeLeft };
+  return { gameState, highlightedId, loserId, timeLeft, lockedTouches };
 }
