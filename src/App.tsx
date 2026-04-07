@@ -103,7 +103,7 @@ function App() {
             ) : (
               <>
                 <span className="text-slate-400 font-medium text-lg bg-slate-900/60 px-4 py-2 rounded-full backdrop-blur-sm border border-slate-700">
-                  한 명씩 3초간 눌러 고정한 뒤 떼어주세요! (현재: {stampedCount}명)
+                  3초간 꾹 눌러서 참가 (참가자: {stampedCount}명)
                 </span>
                 {stampedCount >= 2 && (
                   <button
