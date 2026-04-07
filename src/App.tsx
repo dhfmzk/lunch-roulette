@@ -47,6 +47,7 @@ function App() {
     <div 
       ref={containerRef}
       onPointerDown={() => initAudio()}
+      onContextMenu={(e) => e.preventDefault()}
       className="w-full h-full bg-slate-900 relative overflow-hidden flex items-center justify-center select-none"
       style={{ touchAction: 'none' }}
     >
