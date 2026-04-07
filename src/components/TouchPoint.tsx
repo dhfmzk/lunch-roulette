@@ -80,7 +80,7 @@ export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, isL
         pointerEvents: 'none'
       }}
     >
-      <span className="text-white text-4xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] z-20">
+      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[52%] text-white text-4xl font-black z-20">
         {index}
       </span>
       {!isStamped && isLargeGroup && gameState === 'WAITING' && (
