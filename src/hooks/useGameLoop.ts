@@ -17,7 +17,6 @@ export function useGameLoop(activeTouches: TouchInfo[], mode: 'STANDARD' | 'LARG
   // 1. Abort logic or Start
   useEffect(() => {
     const physicalCount = activeTouches.filter(t => t.isPhysical).length;
-    const stampedCount = activeTouches.filter(t => t.isStamped).length;
 
     if (mode === 'STANDARD') {
       if (gameState === 'READY_TIMER') {
@@ -57,12 +56,8 @@ export function useGameLoop(activeTouches: TouchInfo[], mode: 'STANDARD' | 'LARG
            setLockedTouches([...activeTouches]);
         }
       } else if (gameState === 'WAITING') {
-        if (stampedCount >= 2 && physicalCount === 0) {
-           // Everyone let go, minimum 2 stamped fingers
-           setLockedIds(activeTouches.filter(t => t.isStamped).map(t => t.id));
-           setLockedTouches([...activeTouches]);
-           setGameState('READY_TIMER');
-        }
+        // Explicitly requires manual `startGame()` trigger for Large Group Mode,
+        // so we don't automatically trigger when `physicalCount === 0`.
       }
     }
   }, [activeIdsStr, gameState, mode]);
@@ -143,5 +138,17 @@ export function useGameLoop(activeTouches: TouchInfo[], mode: 'STANDARD' | 'LARG
     setTimeLeft(null);
   };
 
-  return { gameState, highlightedId, loserId, timeLeft, lockedTouches, resetGame };
+  const startGame = () => {
+    if (gameState === 'WAITING' && activeTouches.length >= 2) {
+      if (mode === 'LARGE_GROUP') {
+        setLockedIds(activeTouches.filter(t => t.isStamped).map(t => t.id));
+      } else {
+        setLockedIds(activeTouches.map(t => t.id));
+      }
+      setLockedTouches([...activeTouches]);
+      setGameState('READY_TIMER');
+    }
+  };
+
+  return { gameState, highlightedId, loserId, timeLeft, lockedTouches, resetGame, startGame };
 }

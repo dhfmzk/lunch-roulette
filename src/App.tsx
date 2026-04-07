@@ -25,8 +25,10 @@ function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<GameMode>('STANDARD');
   const { activeTouches, clearStamped } = useMultiTouch(containerRef, mode);
-  const { gameState, highlightedId, loserId, timeLeft, lockedTouches, resetGame } = useGameLoop(activeTouches, mode);
+  const { gameState, highlightedId, loserId, timeLeft, lockedTouches, resetGame, startGame } = useGameLoop(activeTouches, mode);
   const [simCount, setSimCount] = useState<number>(2);
+  
+  const stampedCount = activeTouches.filter(t => t.isStamped).length;
 
   useEffect(() => {
     if (gameState === 'FINISHED') {
@@ -92,13 +94,27 @@ function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute bottom-16 text-slate-400 font-medium text-lg pointer-events-none"
+            className="absolute bottom-16 flex flex-col items-center gap-4 z-50 pointer-events-none"
           >
-            {mode === 'STANDARD' ? 
-              (displayTouches.length === 0 ? "손가락을 최소 2개 이상 올려주세요!" : "그대로 유지하세요...") 
-             : 
-              ("한 명씩 3초간 눌러 고정한 뒤 차례로 떼어주세요!")
-            }
+            {mode === 'STANDARD' ? (
+              <span className="text-slate-400 font-medium text-lg drop-shadow-md">
+                {displayTouches.length === 0 ? "손가락을 최소 2개 이상 올려주세요!" : "그대로 유지하세요..."}
+              </span>
+            ) : (
+              <>
+                <span className="text-slate-400 font-medium text-lg bg-slate-900/60 px-4 py-2 rounded-full backdrop-blur-sm border border-slate-700">
+                  한 명씩 3초간 눌러 고정한 뒤 떼어주세요! (현재: {stampedCount}명)
+                </span>
+                {stampedCount >= 2 && (
+                  <button
+                    onClick={() => startGame()}
+                    className="px-8 py-4 bg-indigo-500 text-white rounded-full font-black text-2xl shadow-[0_10px_30px_rgba(99,102,241,0.6)] hover:bg-indigo-400 hover:scale-105 active:scale-95 transition-all pointer-events-auto"
+                  >
+                    룰렛 돌리기
+                  </button>
+                )}
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -110,14 +126,14 @@ function App() {
             animate={{ scale: 1, opacity: 1, y: -20 }}
             className="absolute z-50 flex flex-col items-center justify-center pointer-events-none"
           >
-            <div className="text-5xl font-black text-white mix-blend-overlay drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] tracking-tighter text-center">
+            <div className="text-5xl font-black text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] tracking-tighter text-center">
               <div>
-                <span style={{ color: loserTouch.color, textShadow: '0 0 20px #000' }}>
+                <span className="drop-shadow-[0_0_20px_rgba(0,0,0,1)]" style={{ color: loserTouch.color, textShadow: '0 0 20px #000' }}>
                   {COLOR_NAMES[loserTouch.color] || ''}
                 </span>
-                <span> 당첨!</span>
+                <span className="drop-shadow-lg"> 당첨!</span>
               </div>
-              <p className="text-sm font-medium mt-6 tracking-normal drop-shadow-md text-white opacity-90 break-keep">
+              <p className="text-sm font-medium mt-6 tracking-normal drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] text-white opacity-95 break-keep">
                 당첨자는 식권대장 앱을 열고 메뉴를 큐레이션해주세요.
               </p>
             </div>
