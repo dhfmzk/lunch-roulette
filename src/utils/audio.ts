@@ -2,7 +2,8 @@ let audioCtx: AudioContext | null = null;
 
 function getContext() {
   if (!audioCtx) {
-    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const CustomAudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    audioCtx = new CustomAudioContext();
   }
   if (audioCtx.state === 'suspended') {
     audioCtx.resume();
@@ -32,7 +33,7 @@ export function playTick() {
     
     osc.start();
     osc.stop(ctx.currentTime + 0.05);
-  } catch (e) {
+  } catch {
     // Ignore audio errors silently
   }
 }
@@ -58,7 +59,7 @@ export function playResult() {
     
     osc.start();
     osc.stop(ctx.currentTime + 1.2);
-  } catch (e) {
+  } catch {
     // Ignore audio errors silently
   }
 }

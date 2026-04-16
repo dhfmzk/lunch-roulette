@@ -95,7 +95,7 @@ export function TouchPoint({ x, y, color, isHighlighted, isLoser, isStamped, isL
             className="opacity-70 drop-shadow-md"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 3, ease: "linear" }}
+            transition={{ duration: 1, ease: "linear" }}
             style={{ rotate: -90, transformOrigin: 'center' }}
           />
         </svg>

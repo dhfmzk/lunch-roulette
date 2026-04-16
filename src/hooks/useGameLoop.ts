@@ -60,6 +60,7 @@ export function useGameLoop(activeTouches: TouchInfo[], mode: 'STANDARD' | 'LARG
         // so we don't automatically trigger when `physicalCount === 0`.
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIdsStr, gameState, mode]);
 
   // 2. Ready Timer with Countdown
@@ -83,7 +84,7 @@ export function useGameLoop(activeTouches: TouchInfo[], mode: 'STANDARD' | 'LARG
     } else {
       setTimeLeft(null);
     }
-  }, [gameState, activeIdsStr]);
+  }, [gameState, activeIdsStr, mode]);
 
   // 3. Roulette Animation
   useEffect(() => {

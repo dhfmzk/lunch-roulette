@@ -29,11 +29,16 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>, mode:
   const stampTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   const stampedRef = useRef(stampedTouches);
-  stampedRef.current = stampedTouches;
+  
+  useEffect(() => {
+    stampedRef.current = stampedTouches;
+  }, [stampedTouches]);
 
   // Clear when mode changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhysicalTouches(new Map());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStampedTouches(new Map());
     stampTimers.current.forEach(t => clearTimeout(t));
     stampTimers.current.clear();
@@ -78,7 +83,7 @@ export function useMultiTouch(containerRef: RefObject<HTMLElement | null>, mode:
                   ns.set(touch.identifier, { ...tInfo, isStamped: true, isPhysical: false });
                   return ns;
                 });
-              }, 3000);
+              }, 1000);
               stampTimers.current.set(touch.identifier, timer);
             }
           }
